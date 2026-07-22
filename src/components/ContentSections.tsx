@@ -1,4 +1,7 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ArrowUpRight, Clock, Mail, MapPin, Phone, Plus, Utensils } from "lucide-react";
 import { useReservationDialog } from "./ReservationDialog";
 import {
@@ -116,12 +119,14 @@ function DishImage({ dish }: { dish: Dish }) {
   return (
     <div className="relative aspect-[4/3] w-full overflow-hidden bg-canvas-3">
       {!failed && dish.image ? (
-        <img
+        <Image
           src={`/assets/food/${dish.image}`}
           alt={dish.name}
+          fill
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           loading="lazy"
           onError={() => setFailed(true)}
-          className="h-full w-full object-cover transition-transform duration-700 will-change-transform group-hover:scale-[1.06]"
+          className="object-cover transition-transform duration-700 will-change-transform group-hover:scale-[1.06]"
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgba(200,53,59,0.18),transparent_60%)]">
@@ -446,7 +451,7 @@ function Faqs() {
 function VisitFooter() {
   const ref = useReveal();
   return (
-    <footer ref={ref} id="visit" className="paper-texture border-t border-line bg-canvas-2">
+    <section ref={ref} id="visit" className="paper-texture border-t border-line bg-canvas-2">
       <div className="mx-auto max-w-7xl px-5 pb-16 pt-24 md:px-8 md:pt-32">
         <SectionMark index="07">Visit us</SectionMark>
 
@@ -523,7 +528,7 @@ function VisitFooter() {
           <span>A journey through Nepalese taste and spirit</span>
         </div>
       </div>
-    </footer>
+    </section>
   );
 }
 

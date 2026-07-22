@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { POSTER_SOURCES, VIDEO_SOURCES } from "../config/site";
 import { journey } from "../lib/journeyStore";

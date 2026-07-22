@@ -43,6 +43,74 @@ export const SITE = {
 } as const;
 
 /**
+ * Approximate geo coordinates for Farrer ACT 2607, used only for the
+ * Restaurant JSON-LD `geo` block. These are a suburb-level approximation, not a
+ * surveyed pin for 4 Farrer Place; refine against Google Business Profile
+ * before relying on them for maps.
+ */
+export const GEO = {
+  lat: -35.3766,
+  lng: 149.0985,
+  approximate: true,
+} as const;
+
+/**
+ * Optional announcement bar copy shown above the nav (e.g. a holiday closure
+ * or an event night). Empty string means no bar renders. Keep it short and
+ * free of em/en dashes per the house style.
+ */
+export const ANNOUNCEMENT = "";
+
+export interface Review {
+  author: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  /** Human relative date, matching Google's "a week ago" style. */
+  date: string;
+  quote: string;
+}
+
+/**
+ * PLACEHOLDER reviews. These are NOT real Google reviews and carry no real
+ * rating. They exist purely as a graceful fallback so the reviews section
+ * never renders empty before the Google Places integration (PLAN Phase 6)
+ * supplies live data. Do NOT feed these into AggregateRating JSON-LD, and do
+ * not present them as genuine customer ratings. Replace with real quotes the
+ * owner has approved, or let the live API override them.
+ */
+export const REVIEWS: Review[] = [
+  {
+    author: "Sample Reviewer A",
+    rating: 5,
+    date: "a week ago",
+    quote: "The jhol momo is the best I have had in Canberra. Warm room, generous spice, we will be back.",
+  },
+  {
+    author: "Sample Reviewer B",
+    rating: 5,
+    date: "two weeks ago",
+    quote: "Proper Nepalese cooking in Farrer. The thali set is a feast and the staff made us feel at home.",
+  },
+  {
+    author: "Sample Reviewer C",
+    rating: 4,
+    date: "a month ago",
+    quote: "Lovely food and a great little bar. Book ahead on weekends, it fills up fast for good reason.",
+  },
+  {
+    author: "Sample Reviewer D",
+    rating: 5,
+    date: "a month ago",
+    quote: "Butter chicken and garlic naan done right, and the cocktails are a genuine surprise. A local gem.",
+  },
+  {
+    author: "Sample Reviewer E",
+    rating: 5,
+    date: "two months ago",
+    quote: "Took the family for a birthday and they looked after us beautifully. Authentic, friendly and worth the drive.",
+  },
+];
+
+/**
  * Reservation feature video. Drop the BytePlus table + Mustang beer clip here
  * as public/assets/mustang-table.mp4 and it plays as a muted loop in the
  * Reserve section. Until then it falls back to the poster still below.

@@ -1,16 +1,18 @@
+"use client";
+
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowUpRight, Flame } from "lucide-react";
 import { CHAPTERS, EXPERIENCE_VH, SITE } from "../config/site";
 import { journey } from "../lib/journeyStore";
 import { useLenis } from "../hooks/useLenis";
-import VideoStage from "../components/VideoStage";
-import { useReservationDialog } from "../components/ReservationDialog";
-import TicketNav from "../components/TicketNav";
-import ProgressRail from "../components/ProgressRail";
-import ContentSections from "../components/ContentSections";
+import VideoStage from "./VideoStage";
+import { ReservationDialogProvider, useReservationDialog } from "./ReservationDialog";
+import { ToastProvider } from "./Toast";
+import TicketNav from "./TicketNav";
+import ProgressRail from "./ProgressRail";
+import ContentSections from "./ContentSections";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -106,7 +108,32 @@ function Steam() {
   );
 }
 
-export default function Experience() {
+/**
+ * Splits a heading line into inline-block character spans so a bloom chapter
+ * can be animated with transforms + opacity only. This replaces the old
+ * per-frame `letterSpacing` tween, which forced a text reflow on every scrubbed
+ * frame; transforms never touch layout, so the same "letters settling in" look
+ * costs nothing. Spaces become non-breaking so inline-block does not collapse.
+ */
+function splitLineToChars(line: HTMLElement): HTMLElement[] {
+  const text = line.textContent ?? "";
+  line.textContent = "";
+  const spans: HTMLElement[] = [];
+  const frag = document.createDocumentFragment();
+  for (const ch of text) {
+    const span = document.createElement("span");
+    span.className = "bloom-char";
+    span.style.display = "inline-block";
+    span.style.willChange = "transform";
+    span.textContent = ch === " " ? " " : ch;
+    frag.appendChild(span);
+    spans.push(span);
+  }
+  line.appendChild(frag);
+  return spans;
+}
+
+function ExperienceJourney() {
   const lenisRef = useLenis();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const journeyRef = useRef<HTMLElement | null>(null);
@@ -223,18 +250,27 @@ export default function Experience() {
       // tracking bloom for the bar, a grand settle for the table.
       document.querySelectorAll<HTMLElement>("[data-chapter-panel]").forEach((panel) => {
         const fx = panel.dataset.fx;
-        const lines = panel.querySelectorAll(".chapter-line");
+        const lines = panel.querySelectorAll<HTMLElement>(".chapter-line");
         const heading = panel.querySelector<HTMLElement>("[data-chapter-heading]");
         const card = panel.querySelector<HTMLElement>("[data-chapter-card]");
         const extras = panel.querySelectorAll("[data-chapter-extra]");
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: panel.parentElement,
-            start: "top 80%",
-            end: "top 25%",
-            scrub: 0.6,
-          },
-        });
+
+        // PERFORMANCE FIX B: keep the sear (blur) tween cheap by scoping
+        // will-change:filter to only while this panel is in its active scroll
+        // range, then releasing the layer so the compositor is not pinned.
+        const stVars: ScrollTrigger.Vars = {
+          trigger: panel.parentElement,
+          start: "top 80%",
+          end: "top 25%",
+          scrub: 0.6,
+        };
+        if (fx === "sear" && heading) {
+          stVars.onToggle = (self) => {
+            heading.style.willChange = self.isActive ? "filter" : "auto";
+          };
+        }
+        const tl = gsap.timeline({ scrollTrigger: stVars });
+
         if (fx === "wipe" && card) {
           tl.fromTo(
             card,
@@ -244,10 +280,17 @@ export default function Experience() {
           );
         }
         if (fx === "bloom") {
+          // PERFORMANCE FIX A: the letters settle in via transforms + opacity
+          // only (no per-frame letterSpacing reflow). Each line is split into
+          // inline-block chars that flow in from the right with a stagger.
+          const chars: HTMLElement[] = [];
+          lines.forEach((line) => {
+            splitLineToChars(line).forEach((c) => chars.push(c));
+          });
           tl.fromTo(
-            lines,
-            { letterSpacing: "0.22em", opacity: 0 },
-            { letterSpacing: "0em", opacity: 1, stagger: 0.05, ease: "none" },
+            chars,
+            { xPercent: 60, opacity: 0 },
+            { xPercent: 0, opacity: 1, stagger: 0.03, ease: "none" },
             0,
           );
         } else {
@@ -439,21 +482,20 @@ export default function Experience() {
         </section>
       </main>
 
-      {/* ACT 2: the real restaurant, on solid ground */}
+      {/* ACT 2: the real restaurant, on solid ground. The site-wide <Footer/>
+          in the root layout closes the page; the old inline copyright strip is
+          gone so there is exactly one footer. */}
       <ContentSections />
-
-      <div className="relative z-10 bg-canvas-2">
-        <div className="docket-rule mx-auto max-w-7xl" />
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-5 font-mono text-[10px] uppercase tracking-[0.18em] text-fg-faint md:px-8">
-          <span>Copyright {new Date().getFullYear()} The Mustang</span>
-          <a href={`mailto:${SITE.email}`} className="transition-colors hover:text-fg">
-            {SITE.email}
-          </a>
-          <Link to="/prompt" className="transition-colors hover:text-fg">
-            Prompt archive
-          </Link>
-        </div>
-      </div>
     </div>
+  );
+}
+
+export default function Experience() {
+  return (
+    <ToastProvider>
+      <ReservationDialogProvider>
+        <ExperienceJourney />
+      </ReservationDialogProvider>
+    </ToastProvider>
   );
 }

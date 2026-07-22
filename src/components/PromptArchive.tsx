@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ArrowLeft, Check, Copy } from "lucide-react";
 import { SITE, VIDEO_FILENAME, VIDEO_SOURCES } from "../config/site";
 
@@ -137,7 +139,7 @@ export default function PromptArchive() {
     <div className="min-h-dvh bg-canvas text-fg">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-6 md:px-8">
         <Link
-          to="/"
+          href="/"
           className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-fg-dim transition-colors hover:text-fg"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
@@ -170,9 +172,9 @@ export default function PromptArchive() {
         </Field>
 
         <Field label="Stack and architecture">
-          React 19, TypeScript, Vite, Tailwind CSS v4 via @tailwindcss/vite, GSAP ScrollTrigger, Lenis smooth
-          scrolling, react-router-dom with BrowserRouter, lucide-react, native HTML video scrubbed by scroll with no
-          canvas rendering. Two routes: the 520vh experience at / and this archive at /prompt.
+          React 19, TypeScript, Next.js App Router, Tailwind CSS v4, GSAP ScrollTrigger, Lenis smooth scrolling,
+          next/link routing, lucide-react, native HTML video scrubbed by scroll with no canvas rendering. The 520vh
+          film experience lives at / and this archive at /prompt.
         </Field>
 
         <div className="border border-line bg-canvas-2/60 p-6">

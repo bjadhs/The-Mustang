@@ -136,7 +136,7 @@ src/
 
 ### 🛠️ 3.3 Migration steps
 
-1. Scaffold Next 15 + TS + Tailwind v4 (`@tailwindcss/postcss`), port the
+1. Scaffold Next 16 + TS + Tailwind v4 (`@tailwindcss/postcss`), port the
    `@theme` token block from `src/styles.css` unchanged.
 2. Move fonts to `next/font` (self-hosted Cabinet Grotesk, Inter Tight,
    JetBrains Mono) with `display: swap`. Kills FOUT and a CLS source.

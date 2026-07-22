@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, CalendarCheck, Loader2 } from "lucide-react";
 import { SITE } from "../config/site";

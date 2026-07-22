@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import { CHAPTERS } from "../config/site";
 import { journey } from "../lib/journeyStore";
