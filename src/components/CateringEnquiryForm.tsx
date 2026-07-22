@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowUpRight, CheckCircle2, Loader2, Utensils } from "lucide-react";
 import { SITE } from "../config/site";
+import { useNow } from "../lib/hooks/use-now";
 
 /**
  * Catering enquiry form. POSTs JSON to /api/reserve (built by the reserve agent)
@@ -44,8 +45,10 @@ export default function CateringEnquiryForm() {
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [status, setStatus] = useState<Status>("idle");
 
-  // Enquiries only make sense for a date from today forward.
-  const today = new Date().toISOString().slice(0, 10);
+  // Enquiries only make sense for a date from today forward. Hydration-safe:
+  // undefined until mounted so the static HTML never bakes in the build date.
+  const now = useNow();
+  const today = now ? new Date(now).toISOString().slice(0, 10) : undefined;
 
   const set =
     (key: keyof Fields) =>

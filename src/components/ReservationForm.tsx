@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, CalendarCheck, Loader2 } from "lucide-react";
 import { SITE } from "../config/site";
+import { useNow } from "../lib/hooks/use-now";
 import { useToast } from "./Toast";
 
 /* Dinner service runs 5:00pm to 9:30pm, so seatings stop at 9:00pm. */
@@ -44,8 +45,10 @@ export default function ReservationForm({ onSuccess }: { onSuccess?: () => void 
   const toast = useToast();
   const timers = useRef<number[]>([]);
 
-  // Reservations only make sense from today forward.
-  const today = new Date().toISOString().slice(0, 10);
+  // Reservations only make sense from today forward. Hydration-safe: undefined
+  // until mounted so the static HTML never bakes in the build date.
+  const now = useNow();
+  const today = now ? new Date(now).toISOString().slice(0, 10) : undefined;
 
   useEffect(() => {
     const t = timers.current;

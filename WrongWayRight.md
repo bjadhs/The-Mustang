@@ -4,6 +4,14 @@ Real mistakes caught and corrected. Newest entries at the top.
 
 ---
 
+## 6. AI SDK v7 convertToModelMessages is async
+
+**Wrong way:** The `/api/chat` route handler was written as `messages: convertToModelMessages(messages)` in the POST body for `generateText()`, treating `convertToModelMessages` as synchronous (as it was in older AI SDK versions and as the type snippet in `node_modules/ai/dist/index.d.ts` appeared to suggest). The Next.js build failed with a type error because in ai@7.0.35, `convertToModelMessages` returns `Promise<ModelMessage[]>`, not `ModelMessage[]`.
+
+**Right way:** `messages: await convertToModelMessages(messages)` inside the async POST handler. Build compiled green and `/api/chat` routed correctly.
+
+**Why:** The AI SDK changed `convertToModelMessages` to async between major versions; memory and older examples show it sync, so the signature is easy to misremember. Cheap check: read the bundled docs in `node_modules/ai/docs/02-getting-started/02-nextjs-app-router.mdx` (shows `await convertToModelMessages(...)`) and always run `npx next build` or `tsc --noEmit` immediately after wiring a new SDK version, rather than trusting a remembered signature. For the Vercel AI SDK specifically, verify against the installed package's bundled source/docs, not training memory or older tutorials.
+
 ## 5. useSearchParams without a Suspense boundary opts the whole route out of static prerender
 
 **Wrong way:** The `/menu` filter state needed to be URL-reflected, so the plan was to call `useRouter`/`useSearchParams` straight inside the `MenuView` client component and read/write the query there. In App Router (Next 16), a client component that calls `useSearchParams` and is not wrapped in `<Suspense>` forces its entire route to render dynamically (`ƒ`) rather than prerender to static HTML (`○`), and in stricter setups the build errors with "useSearchParams() should be wrapped in a suspense boundary". A menu page that we want Google to crawl as static HTML silently losing its static prerender is exactly the wrong outcome.

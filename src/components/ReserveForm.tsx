@@ -16,6 +16,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, CalendarCheck, CheckCircle2, Loader2, MapPin, Phone } from "lucide-react";
 import { SITE } from "../config/site";
+import { useNow } from "../lib/hooks/use-now";
 import FloorPlan, { type TableSelection } from "./FloorPlan";
 
 /* Dinner seatings every 30 minutes, 5:00pm to 9:30pm. */
@@ -68,14 +69,18 @@ export default function ReserveForm() {
   const [error, setError] = useState<string>("");
   const successName = useRef<string>("");
 
-  // Booking window: today through ~30 days out.
-  const { today, maxDate } = useMemo(() => {
-    const now = new Date();
+  // Booking window: today through ~30 days out. Derived from a hydration-safe
+  // clock (0 until mounted) so the date-input min/max are omitted on the server
+  // and first client render, then filled in after hydration. Computing them
+  // during render would bake the build date into the static HTML and mismatch.
+  const now = useNow();
+  const { today, maxDate } = useMemo<{ today?: string; maxDate?: string }>(() => {
+    if (!now) return { today: undefined, maxDate: undefined };
     const iso = (d: Date) => d.toISOString().slice(0, 10);
     const later = new Date(now);
     later.setDate(later.getDate() + 30);
-    return { today: iso(now), maxDate: iso(later) };
-  }, []);
+    return { today: iso(new Date(now)), maxDate: iso(later) };
+  }, [now]);
 
   // Prefill from the AI concierge deep-link (/reserve?date=&time=&party=).
   // Read from window.location on mount rather than useSearchParams so /reserve

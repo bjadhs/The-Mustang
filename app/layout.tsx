@@ -109,7 +109,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: the beforeInteractive theme-init script sets
+    // data-theme on <html> before hydration, so the DOM legitimately differs
+    // from the server markup on this one element. This is the standard
+    // no-flash theme pattern and the diff is intentional.
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${bricolage.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
       >

@@ -4,6 +4,41 @@ Session log: scope, changes, verification, follow-ups. Newest entries at the top
 
 ---
 
+## 2026-07-23 — Vite to Next.js 16 migration, scroll-stutter fix, and production features
+
+**Scope:** Complete migration from Vite SPA to Next.js 16.2.11 App Router with multi-page routing, scroll-stutter resolution, production-ready features (menu, reservations, AI concierge, SEO), and git initialization.
+
+**Changes:**
+- `public/assets/mustang-hero.mp4` — Re-encoded to all-intra (192/192 keyframes) using ffmpeg with `-g 1 -keyint_min 1`; original backed up to `mustang-hero.orig.mp4`. Added 720p variant. Eliminates frame-accurate seek stalls caused by sparse keyframe spacing.
+- Migrated entire app from Vite to Next.js 16.2.11 App Router with per-route static/dynamic rendering.
+- `app/layout.tsx` — Global layout with SiteNav, Footer, ThemeToggle, Metadata API, Restaurant JSON-LD, and Lenis smooth-scroll setup.
+- `app/globals.css` — Ported Tailwind v4 `@theme` tokens to inline semantic variables (canvas/fg/line/chili/cream).
+- `app/fonts.ts` — Migrated to next/font (Bricolage Grotesque, Inter Tight, JetBrains Mono).
+- `app/page.tsx` — Home/landing: Act 1 scroll-scrub film (five CHAPTERS) + Act 2 content sections; scroll-stutter fixed by video re-encode.
+- `app/menu/page.tsx` — Filterable menu (HTML + MenuSection/MenuItem/AggregateOffer JSON-LD); Suspense-wrapped to maintain static prerender (`○`).
+- `app/reserve/page.tsx` — Booking with SVG floor plan (from `config/floorPlan.ts`), form, and `/api/reserve` integration.
+- `app/about/page.tsx` — Story, map image slot, reviews carousel, FAQ; renders FAQPage JSON-LD.
+- `app/catering/page.tsx` — Enquiry form posting to `/api/reserve` with `kind=catering-enquiry`.
+- `app/api/chat/route.ts` — AI concierge (Vercel AI SDK v7, Claude Haiku 4.5); tools: `getMenu`, `startReservation`; supports `/reserve` deep-link prefill via query params.
+- `app/api/reserve/route.ts` — Nodemailer SMTP POST handler for booking + enquiry emails.
+- `app/sitemap.ts`, `app/robots.ts`, `app/not-found.tsx` — SEO hardening (static sitemap, /api disallow, custom 404).
+- `src/config/site.ts` — Added REVIEWS (placeholder) and GEO (location).
+- `src/config/menu.ts`, `src/config/floorPlan.ts` — Structured menu and SVG floor plan for renders.
+- Scroll perf fixes: (a) replaced per-frame letterSpacing tween with transform-based "bloom" scaling (no reflow), (b) scoped will-change:filter to blur targets.
+
+**Verified:**
+- `next build` passes green (11 routes); `.next/server/` artifacts confirm static prerender on /, /menu, /about and SSR on /api/*.
+- Production smoke test via `next start`: 200 on /, /menu, /reserve, /about, /catering, /api/chat, /api/reserve, /prompt; /_not-found → 404.
+- Server-rendered JSON-LD (Restaurant, MenuSection/MenuItem, FAQPage) baked into `.next/server/` HTML.
+- Git initialized: identity bijaya <bijayadhikari107@gmail.com>, checkpoints faf1b0d (checkpoint), 8e5ee67 (foundation), 627b48c (features), 76b7f12 (prefill).
+- **NOT verified:** Map image (public/assets/map.png — client to provide), SMTP_PASS + ANTHROPIC_API_KEY in .env, 23 of ~30 dish photos (7 exist; rest fallback to tiles; 24 subjects in PROMPT.md await Higgsfield), Vercel deploy (no domain assigned).
+
+**Follow-ups:**
+- Client to provide: map.png, SMTP credentials, ANTHROPIC_API_KEY.
+- Execute Higgsfield dish photo generation via PROMPT.md (24 subjects).
+- Vercel deploy: configure domain, push .env, enable preview/production.
+- Production perf: measure LCP/CLS, consider image blur strategy for dish photos.
+
 ## 2026-07-23 — Planning: Next.js migration roadmap, SEO strategy, and scroll-stutter diagnosis
 
 **Scope:** Planning-only session to architect a major framework migration (Vite SPA → Next.js App Router), define SEO hardening, identify scroll-stutter root causes, and create dish photo prompts for Higgsfield generation.
