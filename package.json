@@ -11,8 +11,8 @@
     "fetch:assets": "node scripts/fetch-assets.mjs"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.18",
     "@ai-sdk/react": "^4.0.38",
+    "@openrouter/ai-sdk-provider": "^3.0.0",
     "ai": "^7.0.35",
     "gsap": "^3.12.7",
     "lenis": "^1.1.20",

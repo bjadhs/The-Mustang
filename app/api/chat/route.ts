@@ -7,7 +7,7 @@ import {
   tool,
   type UIMessage,
 } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { z } from "zod";
 import { SITE, FAQS, SERVICES } from "@/config/site";
 import {
@@ -25,7 +25,7 @@ import {
  * ONLY the structured content in src/config. It can look up the live menu
  * (getMenu) and deep-link a guest into the reservation form (startReservation).
  *
- * Requires the ANTHROPIC_API_KEY environment variable at request time. The
+ * Requires the OPENROUTER_API_KEY environment variable at request time. The
  * model is only called when a request arrives, so the route type-checks and
  * builds without the key present.
  */
@@ -200,11 +200,15 @@ const startReservation = tool({
 
 /* --------------------------- Route --------------------------- */
 
+const openrouter = createOpenRouter({
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
+
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: anthropic("claude-haiku-4-5"),
+    model: openrouter("anthropic/claude-haiku-4.5"),
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages),
     tools: { getMenu, startReservation },
