@@ -18,12 +18,19 @@ export default function ThemeToggle({ docked = true }: { docked?: boolean }) {
   const trackTick = docked ? "bg-line" : "bg-cream/40";
 
   return (
+    // suppressHydrationWarning (button + knob only): theme comes from the
+    // beforeInteractive script in app/layout.tsx, which stamps the real value
+    // onto <html> before hydration runs. useTheme's initial state reads that
+    // real value immediately, so isLight can legitimately differ from the
+    // server's always-"dark" render on the first client pass. Same intentional
+    // mismatch as <html>'s own suppressHydrationWarning, just one level down.
     <button
       type="button"
       onClick={toggle}
       aria-label={isLight ? "Switch to night mode" : "Switch to day mode"}
       aria-pressed={isLight}
       title={isLight ? "Night mode" : "Day mode"}
+      suppressHydrationWarning
       className={`group relative flex h-7 w-14 shrink-0 items-center rounded-full border px-[6px] transition-colors duration-500 hover:border-chili focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-chili ${
         docked ? "border-fg-faint bg-canvas-2/70" : "border-cream/60 bg-black/25"
       }`}
@@ -39,6 +46,7 @@ export default function ThemeToggle({ docked = true }: { docked?: boolean }) {
       />
       <span
         aria-hidden="true"
+        suppressHydrationWarning
         className={`tt-knob block h-[13px] w-[13px] rotate-45 transition-transform duration-500 ease-[cubic-bezier(0.6,0.05,0.2,1)] motion-reduce:transition-none ${
           isLight ? "translate-x-[30px]" : "translate-x-0"
         }`}
