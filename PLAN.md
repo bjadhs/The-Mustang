@@ -450,22 +450,22 @@ path only if custom-styled pins become a design requirement.
 | 0 | Scroll stutter fix (re-encode + tween fixes) | none | S | ✅ Done |
 | 1 | Next.js App Router migration, feature parity on `/` | 0 | L | ✅ Done |
 | 2 | Nav revamp + hero contact block + footer NAP | 1 | S | ✅ Nav + footer done, hero pass pending |
-| 3 | SEO layer: metadata, JSON-LD, sitemap, robots, redirects | 1 | M | 🔄 In progress (feature workflow) |
-| 4 | `/menu` page + `menu.ts` + generate PROMPT.md images | 1 | M | 🔄 `menu.ts` done, page building; images not generated |
-| 5 | `/about` + `/catering` pages | 1 | M | 🔄 In progress (feature workflow) |
-| 6 | `/reserve` revamp: floor plan + form + email route | 1 | L | 🔄 In progress (feature workflow) |
-| 7 | AI concierge (ai-sdk) | 1 | M | 🔄 In progress (feature workflow) |
-| 8 | Maps + Reviews (landing band + about section) | 5 | M | 🔄 Reviews building; map = owner image, added at end |
-| 9 | Production hardening, Vercel deploy (no domain) | all | M | ⬜ Pending |
+| 3 | SEO layer: metadata, JSON-LD, sitemap, robots | 1 | M | ✅ Done (Restaurant/Menu/FAQPage JSON-LD, sitemap, robots, 404) |
+| 4 | `/menu` page + `menu.ts` | 1 | M | ✅ Page + Menu JSON-LD done; dish images still to generate (PROMPT.md) |
+| 5 | `/about` + `/catering` pages | 1 | M | ✅ Done (map-image slot awaits owner image) |
+| 6 | `/reserve` revamp: floor plan + form + email route | 1 | L | ✅ Done (SMTP route needs `.env` password) |
+| 7 | AI concierge (ai-sdk) | 1 | M | ✅ Done (needs `ANTHROPIC_API_KEY` at runtime) |
+| 8 | Reviews (landing band + about section) | 5 | M | ✅ Reviews done; map = owner image at `public/assets/map.png` |
+| 9 | Production hardening, Vercel deploy (no domain) | all | M | ⬜ Pending (build green + smoke test passed) |
 
-Each phase ends with `npm run build` green and a visual check. Phases 4-8
-are parallelizable after the migration lands.
+Each phase ends with `npm run build` green and a visual check.
 
-✅ **Done so far:** Phase 0 (video re-encode + tween fixes), Phase 1 (full
-Next.js 16 migration, build green), Phase 2 nav + footer.
-🔄 **Building now** (feature workflow, max 5 subagents): /menu, /reserve,
-/about, /catering, AI concierge, then SEO + integration.
-⬜ **Pending:** owner's map image + SMTP password, final QA, Vercel deploy.
+✅ **Done:** Phases 0-8. `next build` green (11 routes); `next start` smoke
+test passed (all routes 200, JSON-LD present, /_not-found 404, sitemap
+excludes /prompt, robots blocks /api).
+⬜ **Pending (owner inputs + deploy):** map image at `public/assets/map.png`,
+`.env` (SMTP password + `ANTHROPIC_API_KEY`), generate remaining dish photos
+from PROMPT.md, point sitemap/canonical host at an env var, then Vercel deploy.
 
 📝 Note: open questions for the owner, none of which block Phases 0-4:
 real floor plan sketch (7.1), Google Maps API key + billing (8), a Resend
