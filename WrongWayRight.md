@@ -4,6 +4,18 @@ Real mistakes caught and corrected. Newest entries at the top.
 
 ---
 
+## 7. Two hydration traps: build-baked dates and a Date.now() useSyncExternalStore snapshot
+
+**Wrong way (two mistakes in one fix):**
+1. The reserve/catering/reservation forms set date-input bounds with `const today = new Date().toISOString().slice(0,10)` *during render*. On the statically prerendered `/reserve` and `/catering`, that runs at **build time**, baking e.g. `min="2026-07-23"` into the HTML, while the client recomputes today on hydration. React threw a hydration mismatch on every load after build day. (Separately, the root `<html>` got a `data-theme` from a pre-paint script React didn't render, another mismatch.)
+2. The first fix attempt added a `useNow()` hook backed by `useSyncExternalStore(subscribe, () => Date.now(), () => 0)`. The browser immediately threw "Maximum update depth exceeded": `getSnapshot` returned a fresh `Date.now()` on every call, so the store looked changed on every render and looped forever.
+
+**Right way:**
+1. Add `suppressHydrationWarning` to `<html>` (standard no-flash-theme pattern), and derive date bounds from a hydration-safe clock that returns `0` until mounted, so SSR and the first client render both omit `min`/`max`, then fill them in post-hydration.
+2. Cache the snapshot in a ref: `getSnapshot = () => { if (snapshot.current === 0) snapshot.current = Date.now(); return snapshot.current; }`, and only advance it on a real interval tick. Server snapshot stays a stable `0`. Verified in-browser: `/`, `/reserve`, `/catering` console-clean.
+
+**Why:** `useSyncExternalStore` calls `getSnapshot` on every render and re-renders whenever the returned value differs by `Object.is`; a snapshot that is never equal to itself (`Date.now()`, `{}`, `[]`, `Math.random()`) is a guaranteed infinite loop. The snapshot must be a cached value that changes only when the underlying data actually changes. And anything time/random/locale/-derived must never be produced *during render* for content that ends up in prerendered HTML, because "server" for a static route means build time, not request time. Cheap check: run `next dev` and watch the console after any change touching `Date`, `Math.random`, `useSyncExternalStore`, or theme attributes, rather than trusting a green `next build` (hydration errors only surface at runtime in dev).
+
 ## 6. AI SDK v7 convertToModelMessages is async
 
 **Wrong way:** The `/api/chat` route handler was written as `messages: convertToModelMessages(messages)` in the POST body for `generateText()`, treating `convertToModelMessages` as synchronous (as it was in older AI SDK versions and as the type snippet in `node_modules/ai/dist/index.d.ts` appeared to suggest). The Next.js build failed with a type error because in ai@7.0.35, `convertToModelMessages` returns `Promise<ModelMessage[]>`, not `ModelMessage[]`.
