@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.next/
+out/
+.vercel/
+.DS_Store
+*.local
+.env*
+!.env.example
+public/assets/*.mp4

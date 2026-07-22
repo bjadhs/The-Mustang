@@ -1,0 +1,37 @@
+# WrongWayRight.md
+
+Real mistakes caught and corrected. Newest entries at the top.
+
+---
+
+## 4. rAF-gated entrance animations screenshot as invisible in a non-foreground automation tab
+
+**Wrong way:** The reservation dialog and toast play their entrance by mounting at `opacity-0` and flipping to `opacity-100` on the next `requestAnimationFrame` (`useEffect(() => { requestAnimationFrame(() => setShown(true)) })`). Driving the page through browser automation, the dialog screenshotted as bare form controls floating on the food photo with *no* panel fill and *no* backdrop dim, even a full second after opening. First read was "the `bg-canvas-2` panel and `bg-black/70` backdrop aren't rendering" — i.e. a CSS bug.
+
+**Right way:** `getComputedStyle` told the real story: backdrop `background: oklab(0 0 0 / 0.7)`, `backdrop-filter: blur(8px)`, panel `background: rgb(27,33,41)` — all correct — but `opacity` was stuck at `0.08`/`0.44`, mid-transition. The automated tab isn't the foreground tab, so `requestAnimationFrame` and CSS transitions are throttled/paused and the entrance never completes on the compositor. To capture the intended look, force the resting state before the screenshot: `el.style.transition='none'; el.style.opacity='1'; el.style.transform='none'`. Behavior itself was verified structurally (`requestSubmit()` -> `dialogStillOpen:false`, `toastPresent:true`, correct toast text), not from the camera.
+
+**Why:** Background/occluded tabs clamp `requestAnimationFrame` to near-zero and freeze compositor-driven transitions, so any "reveal on next frame" pattern stays at its initial style in automation even though the markup and computed values are right. Same family as entry 3 (trust the DOM over the screenshot), different mechanism: there it was Lenis desync, here it is rAF/transition throttling. Cheap check: if elements are present with correct computed `background`/`border` but a fractional `opacity`, it is a stalled entrance, not a style bug — force the end state or assert on computed values instead of pixels.
+
+## 3. Screenshotting Act 2 by programmatic scroll fights Lenis and returns blank frames
+
+**Wrong way:** To verify the new reservation form in the Reserve section (far down Act 2), I drove the page with `End`, keyboard `PageUp`, and the extension's `scroll_to` (which calls native `scrollIntoView`). Every screenshot came back as a uniform charcoal `#14181d` (bare `canvas`), even though `getBoundingClientRect()` reported the form at `top: 32, opacity: 1, visible` and dead-center in the viewport. I burned ~15 tool calls chasing "why is the form not rendering" when nothing was wrong with the form.
+
+**Right way:** Two things. (1) For *functional* proof, drive the React form directly in one `javascript_tool` call: set each control with the native value setter + dispatched `input`/`change` events, `form.requestSubmit()`, then poll `button.innerText` and `document.querySelector('[role=status]')` — that captured the full flow (`"Sending your request"` -> reset, `toastPresent: true`, fields cleared) deterministically. (2) For *visual* proof, only the extension's wheel `scroll` action moves Lenis in sync with what gets painted; native scroll APIs do not. Even then, land slowly — the hero, chapters and dish grid all screenshotted fine mid-wheel-scroll.
+
+**Why:** Lenis smooth-scroll keeps its own animated scroll target and translates the content; native `scrollIntoView`/`End`/`scrollTo` jump the *native* scroll offset while Lenis holds the paint elsewhere, so the compositor shows a gap (the fixed `VideoStage`/canvas) and `getBoundingClientRect` — which reflects native layout — disagrees with the pixels. A second trap in the same page: `[data-reveal]` sections start at `opacity-0` and only flip via IntersectionObserver, which doesn't fire for elements fast-scrolled past, so those sections are *legitimately* invisible in automation (force them with `el.dataset.shown='true'`). The cheap check: if a screenshot is blank but `getBoundingClientRect` says the element is on-screen and opaque, stop debugging the element — it is a smooth-scroll/compositor desync, so verify behavior via the DOM instead of the camera. (`window.lenis` is only the library's `{version}` marker, not the instance — the instance lives in the `useLenis` ref and is not reachable from the page.)
+
+## 2. Chili accent text over warm footage passes in the head, fails on the plate
+
+**Wrong way:** Station eyebrow labels ("04 FIRE", "05 TABLE") were set in brand chili #c8353b with a text-shadow directly over the film, assuming the shadow guaranteed legibility. A real-browser screenshot audit showed chili on the warm brown/rice frames has almost no luminance gap and was genuinely hard to read even with `text-shadow 0 1px 10px rgba(0,0,0,0.65)`.
+
+**Right way:** Cream #f6efe2 carries the words (using the .on-film layered-shadow treatment) and chili is demoted to a glowing 7px diamond tick next to the label; scrims behind copy that crosses the bright plate were bumped from 0.52/0.55 to a `strong` 0.68 radial variant.
+
+**Why:** Text-shadow fixes contrast against darkness, not against similar-luminance hues. A saturated accent over footage of food in the same warm register fails no matter the shadow depth. The cheap check is screenshotting text over the actual worst-case frame (the brightest/warmest one), not judging from token values alone.
+
+## 1. var(--color-*) does not exist at runtime under Tailwind v4 @theme inline
+
+**Wrong way:** styles.css and ContentSections.tsx referenced theme tokens as plain CSS variables, e.g. `background: var(--color-canvas)` on html, `color: var(--color-cream)` in .on-film, and `[-webkit-text-stroke:1.5px_var(--color-fg-faint)]` for outlined marquee glyphs. The build (tsc + vite) passed clean and nothing errored in the console; the page would simply have rendered with an unstyled background and invisible cream text because those variables resolve to nothing.
+
+**Right way:** With `@theme inline`, Tailwind inlines the referenced value into each utility and never emits `--color-*` custom properties to :root, so hand-written CSS must reference the runtime indirection variables directly (`var(--m-canvas)`, `var(--m-fg-faint)`) or use a literal value (#f6efe2 for the constant cream).
+
+**Why:** `@theme inline` exists precisely to skip emitting the --color-* layer; utilities keep working, so the breakage hides in the few hand-written declarations, and a passing build gives false confidence since undefined var() fails silently to `initial`/inherited. Cheap check: `grep -n "var(--color-" src/` after any Tailwind v4 theming work; anything outside the @theme block is suspect.
