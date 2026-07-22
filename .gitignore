@@ -8,6 +8,7 @@ out/
 .env*
 !.env.example
 public/assets/*.mp4
+public/assets/mustang-hero.mp4
 
 *.md
 !README.md

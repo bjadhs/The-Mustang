@@ -7,7 +7,7 @@
  * to pull it into public/assets/), then the hosted render.
  */
 
-export const VIDEO_FILENAME = "mustang-hero.mp4";
+export const VIDEO_FILENAME = "mustang.mp4";
 
 /**
  * Hero scroll-scrub video: the table + Mustang beer journey (Higgsfield veo3).
@@ -15,7 +15,7 @@ export const VIDEO_FILENAME = "mustang-hero.mp4";
  * streams in the browser even before the local file is downloaded.
  */
 export const VIDEO_SOURCES: string[] = [
-  "/assets/mustang-hero.mp4",
+  "/assets/mustang.mp4",
   "https://d8j0ntlcm91z4.cloudfront.net/user_3GMIfznJcTcgt384macCyiYCf6Z/hf_20260722_114954_1d1b474d-bb43-4029-a9b8-803f59d6c041.mp4",
 ];
 
