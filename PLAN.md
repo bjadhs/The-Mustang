@@ -27,7 +27,12 @@ fixed, and one-command deploy to Vercel.
 The "stuck in the middle for a second" symptom during scroll has one primary
 cause and several contributing ones. Ranked by likelihood:
 
-### 🐛 2.1 Primary suspect: video keyframe spacing (GOP)
+### ✅ 2.1 Primary suspect: video keyframe spacing (GOP) — DONE
+
+**Confirmed and fixed.** ffprobe proved the 8s hero had only 1 keyframe across
+192 frames (worst case). Re-encoded `mustang-hero.mp4` to all-intra (192/192
+keyframes) and added a lighter `mustang-hero-720.mp4`; original backed up to
+`mustang-hero.orig.mp4`. Scroll-seeks are now frame-accurate.
 
 Setting `video.currentTime` to a frame that is not a keyframe forces the
 decoder to walk back to the previous keyframe and decode every frame up to
@@ -56,14 +61,12 @@ it via a media query or `matchMedia` check.
 
 ### 🔧 2.2 Contributing causes, fix while in there
 
-1. **`letterSpacing` tween in the Fire chapter** (`Experience.tsx:247`,
-   the `bloom` fx animates `letter-spacing` per scrubbed frame). Letter
-   spacing is a layout property: every frame forces text reflow. Replace
-   with a transform-based effect (per-line `scaleX`/`translate`/opacity, or
-   pre-split characters translated apart with transforms).
-2. **`filter: blur(9px)` tween in the Spice chapter** (`sear` fx). Blur on a
-   large text layer repaints expensively. Add `will-change: filter` for the
-   duration of the tween, or crossfade a pre-blurred duplicate's opacity.
+1. ✅ **DONE — `letterSpacing` tween in the Fire chapter** (`bloom` fx).
+   Replaced with a transform-only per-line split (translate/opacity +
+   `will-change: transform`), zero per-frame reflow.
+2. ✅ **DONE — `filter: blur(9px)` tween in the Spice chapter** (`sear` fx).
+   Kept the look but scoped `will-change: filter` to only while the panel is
+   active in its scroll range.
 3. **`gsap.ticker.lagSmoothing(0)`** in `useLenis.ts:32` disables GSAP's
    recovery after main-thread spikes, so every hiccup is fully visible.
    Intentional for scrub accuracy, but revisit after 1 and 2 are fixed.
@@ -83,7 +86,12 @@ hundred ms `seek` gaps, and the film tracking the scrollbar without pauses.
 
 ---
 
-## 🏗️ 3. Phase 1 — Migrate to Next.js App Router
+## ✅ 3. Phase 1 — Migrate to Next.js App Router — DONE
+
+**Complete.** Next.js 16.2.11 App Router live in place, `next build` green.
+Tokens/fonts (next/font), client/server split, react-router removed for
+next/link, Vite files retired, Lenis/GSAP preserved. Route pages for /menu,
+/reserve, /about, /catering being built in the feature workflow.
 
 Folder-based routing so every nav destination is a real, individually
 indexable URL. Recommended: Next.js 15+ (App Router, Metadata API, next/font,
@@ -159,7 +167,13 @@ the Next build reaches feature parity, so there is always a deployable site.
 
 ---
 
-## 🧭 4. Phase 2 — Navigation and header revamp
+## ✅ 4. Phase 2 — Navigation and header revamp — MOSTLY DONE
+
+**Done:** global `SiteNav` (brand, center Menu/About/Catering links, phone tel
+link, rightmost chili "Reserve a table" button, mobile sheet, ThemeToggle,
+announcement-bar slot) and a full-NAP `Footer`, both mounted in the root
+layout. **Remaining:** confirm the landing hero surfaces phone + hours in the
+first viewport; final visual pass.
 
 Primary nav (all pages, same component):
 
@@ -387,9 +401,11 @@ path only if custom-styled pins become a design requirement.
 
 ## 🚢 9. Phase 7 — Production hardening and Vercel deploy
 
-- **Vercel project**: connect repo, framework preset Next.js. Env vars:
-  `ANTHROPIC_API_KEY`, `GOOGLE_MAPS_API_KEY`, `RESEND_API_KEY` (v1
-  reservations), `DATABASE_URL` (only if reservation v2 lands).
+- **Vercel project**: connect repo, framework preset Next.js. Env vars
+  (per owner decisions): `ANTHROPIC_API_KEY` (concierge), and SMTP for
+  reservation email via nodemailer: `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE`
+  / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` / `RESERVATION_TO`. No Google Maps
+  key (About uses an owner-provided map image). No `DATABASE_URL` in v1.
 - **Media**: dish PNGs (already in `public/`) commit fine; the hero MP4s
   should either be committed (Vercel serves them from the CDN edge) or kept
   on the existing CloudFront URLs; drop the `fetch:assets` step from the
@@ -402,8 +418,8 @@ path only if custom-styled pins become a design requirement.
   Menu, FAQPage; keyboard-only pass of nav, menu filters, floor plan, chat;
   reduced-motion pass; 375 px and 1440 px visual pass; 404 page; favicon +
   app icons + `theme-color`.
-- **Domain**: point `themustangcanberra.com.au` (or subdomain) at Vercel,
-  set the canonical host, submit the sitemap in Search Console.
+- **Domain**: none for now (owner decision) — deploy to the default
+  `*.vercel.app` URL. Revisit custom domain + Search Console sitemap later.
 
 ---
 
@@ -429,22 +445,27 @@ path only if custom-styled pins become a design requirement.
 
 ## ☑️ 11. Build order
 
-| # | Phase | Depends on | Size |
-|---|---|---|---|
-| 0 | Scroll stutter fix (re-encode + tween fixes) | none | S |
-| 1 | Next.js App Router migration, feature parity on `/` | 0 | L |
-| 2 | Nav revamp + hero contact block + footer NAP | 1 | S |
-| 3 | SEO layer: metadata, JSON-LD, sitemap, robots, redirects | 1 | M |
-| 4 | `/menu` page + `menu.ts` + generate PROMPT.md images | 1 | M |
-| 5 | `/about` + `/catering` pages | 1 | M |
-| 6 | `/reserve` revamp: floor plan + form + email route | 1 | L |
-| 7 | AI concierge (ai-sdk) | 1 | M |
-| 8 | Maps + Reviews (landing band + about section) | 5 | M |
-| 9 | Production hardening, Vercel deploy, Search Console | all | M |
+| # | Phase | Depends on | Size | Status |
+|---|---|---|---|---|
+| 0 | Scroll stutter fix (re-encode + tween fixes) | none | S | ✅ Done |
+| 1 | Next.js App Router migration, feature parity on `/` | 0 | L | ✅ Done |
+| 2 | Nav revamp + hero contact block + footer NAP | 1 | S | ✅ Nav + footer done, hero pass pending |
+| 3 | SEO layer: metadata, JSON-LD, sitemap, robots, redirects | 1 | M | 🔄 In progress (feature workflow) |
+| 4 | `/menu` page + `menu.ts` + generate PROMPT.md images | 1 | M | 🔄 `menu.ts` done, page building; images not generated |
+| 5 | `/about` + `/catering` pages | 1 | M | 🔄 In progress (feature workflow) |
+| 6 | `/reserve` revamp: floor plan + form + email route | 1 | L | 🔄 In progress (feature workflow) |
+| 7 | AI concierge (ai-sdk) | 1 | M | 🔄 In progress (feature workflow) |
+| 8 | Maps + Reviews (landing band + about section) | 5 | M | 🔄 Reviews building; map = owner image, added at end |
+| 9 | Production hardening, Vercel deploy (no domain) | all | M | ⬜ Pending |
 
 Each phase ends with `npm run build` green and a visual check. Phases 4-8
-are parallelizable after the migration lands. Suggested first session:
-Phase 0 + Phase 1.
+are parallelizable after the migration lands.
+
+✅ **Done so far:** Phase 0 (video re-encode + tween fixes), Phase 1 (full
+Next.js 16 migration, build green), Phase 2 nav + footer.
+🔄 **Building now** (feature workflow, max 5 subagents): /menu, /reserve,
+/about, /catering, AI concierge, then SEO + integration.
+⬜ **Pending:** owner's map image + SMTP password, final QA, Vercel deploy.
 
 📝 Note: open questions for the owner, none of which block Phases 0-4:
 real floor plan sketch (7.1), Google Maps API key + billing (8), a Resend

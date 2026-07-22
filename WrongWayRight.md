@@ -4,6 +4,14 @@ Real mistakes caught and corrected. Newest entries at the top.
 
 ---
 
+## 5. useSearchParams without a Suspense boundary opts the whole route out of static prerender
+
+**Wrong way:** The `/menu` filter state needed to be URL-reflected, so the plan was to call `useRouter`/`useSearchParams` straight inside the `MenuView` client component and read/write the query there. In App Router (Next 16), a client component that calls `useSearchParams` and is not wrapped in `<Suspense>` forces its entire route to render dynamically (`ƒ`) rather than prerender to static HTML (`○`), and in stricter setups the build errors with "useSearchParams() should be wrapped in a suspense boundary". A menu page that we want Google to crawl as static HTML silently losing its static prerender is exactly the wrong outcome.
+
+**Right way:** Split the component: `export default function MenuView()` returns `<Suspense fallback={null}><MenuViewInner/></Suspense>`, and only `MenuViewInner` calls `useSearchParams`. Keep filter state in React `useState` (initialised once from `searchParams`) as the render source of truth so filtering is instant, and mirror it back with `router.replace(next, { scroll: false })` in an effect keyed on the derived query string. Build confirms it: `/menu` shows `○ (Static)` and the Menu JSON-LD is baked into `.next/server/app/menu.html` (6 MenuSection, 38 MenuItem, 38 AUD offers).
+
+**Why:** `useSearchParams` reads a value only known at request time, so Next must either defer that subtree behind Suspense (letting the rest prerender) or make the whole route dynamic. The Suspense boundary is what lets the static shell prerender while the param-dependent subtree hydrates on the client. Cheap check: after `next build`, look at the route legend, `○` means you kept static, `ƒ` means a hook (usually `useSearchParams`, `cookies()`, `headers()`) pulled the route dynamic, go find it.
+
 ## 4. rAF-gated entrance animations screenshot as invisible in a non-foreground automation tab
 
 **Wrong way:** The reservation dialog and toast play their entrance by mounting at `opacity-0` and flipping to `opacity-100` on the next `requestAnimationFrame` (`useEffect(() => { requestAnimationFrame(() => setShown(true)) })`). Driving the page through browser automation, the dialog screenshotted as bare form controls floating on the food photo with *no* panel fill and *no* backdrop dim, even a full second after opening. First read was "the `bg-canvas-2` panel and `bg-black/70` backdrop aren't rendering" — i.e. a CSS bug.

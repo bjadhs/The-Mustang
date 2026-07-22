@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowUpRight, Clock, Mail, MapPin, Phone, Plus, Utensils } from "lucide-react";
 import { useReservationDialog } from "./ReservationDialog";
+import ReviewsSection from "./ReviewsSection";
 import {
   FAQS,
   MENU_CATEGORIES,
@@ -540,6 +541,7 @@ export default function ContentSections() {
       <SignatureDishes />
       <MenuOverview />
       <Services />
+      <ReviewsSection variant="band" />
       <Reserve />
       <Faqs />
       <VisitFooter />

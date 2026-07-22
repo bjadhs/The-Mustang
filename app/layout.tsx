@@ -4,6 +4,8 @@ import { Bricolage_Grotesque, Inter_Tight, JetBrains_Mono } from "next/font/goog
 import "./globals.css";
 import SiteNav from "../src/components/SiteNav";
 import Footer from "../src/components/Footer";
+import Concierge from "../src/components/Concierge";
+import { SITE, GEO, POSTER_SOURCES } from "../src/config/site";
 
 // Display face. The current app uses Bricolage Grotesque as --font-display
 // (see src/styles.css @theme). Cabinet Grotesk is not on Google Fonts and no
@@ -35,6 +37,64 @@ export const metadata: Metadata = {
   },
   description:
     "Nepalese restaurant and bar at 4 Farrer Place, Farrer ACT. Hand-pleated momo, Himalayan spice and a bar that leans in. Open 7 nights, 5:00pm to 9:30pm. Reserve a table.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE.brand,
+    url: "/",
+    title: "The Mustang, Canberra. A Journey Through Nepalese Taste and Spirit",
+    description:
+      "Nepalese restaurant and bar at 4 Farrer Place, Farrer ACT. Hand-pleated momo, Himalayan spice and a bar that leans in. Open 7 nights, 5:00pm to 9:30pm.",
+    locale: "en_AU",
+    images: [{ url: POSTER_SOURCES[0], alt: `${SITE.brand}, Nepalese restaurant and bar in Farrer` }],
+  },
+};
+
+// Site-wide Restaurant JSON-LD, built from SITE + GEO. No aggregateRating: the
+// reviews shipped in config are labeled placeholder/sample, so faking a rating
+// here would be dishonest and a structured-data violation.
+const RESTAURANT_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "@id": "https://themustangcanberra.com.au/#restaurant",
+  name: SITE.brand,
+  url: "https://themustangcanberra.com.au/",
+  telephone: SITE.phoneHref.replace("tel:", ""),
+  email: SITE.email,
+  image: `https://themustangcanberra.com.au${POSTER_SOURCES[0]}`,
+  servesCuisine: "Nepalese",
+  priceRange: "$$",
+  acceptsReservations: true,
+  hasMenu: "https://themustangcanberra.com.au/menu",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "4 Farrer Place",
+    addressLocality: "Farrer",
+    addressRegion: "ACT",
+    postalCode: "2607",
+    addressCountry: "AU",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: GEO.lat,
+    longitude: GEO.lng,
+  },
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      opens: "17:00",
+      closes: "21:30",
+    },
+  ],
 };
 
 // Pre-paint theme boot. Sets data-theme on <html> from localStorage or the OS
@@ -56,10 +116,14 @@ export default function RootLayout({
         <Script id="theme-init" strategy="beforeInteractive">
           {THEME_INIT}
         </Script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(RESTAURANT_JSONLD) }}
+        />
         <SiteNav />
         {children}
         <Footer />
-        {/* <Concierge/> mounted by concierge agent */}
+        <Concierge />
       </body>
     </html>
   );
