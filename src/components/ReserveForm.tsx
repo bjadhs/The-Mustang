@@ -13,7 +13,7 @@
  * the phone since nothing here confirms availability in real time.
  */
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, CalendarCheck, CheckCircle2, Loader2, MapPin, Phone } from "lucide-react";
 import { SITE } from "../config/site";
 import FloorPlan, { type TableSelection } from "./FloorPlan";
@@ -75,6 +75,29 @@ export default function ReserveForm() {
     const later = new Date(now);
     later.setDate(later.getDate() + 30);
     return { today: iso(now), maxDate: iso(later) };
+  }, []);
+
+  // Prefill from the AI concierge deep-link (/reserve?date=&time=&party=).
+  // Read from window.location on mount rather than useSearchParams so /reserve
+  // stays statically prerendered (no Suspense boundary required).
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const date = q.get("date");
+    const time = q.get("time");
+    const party = q.get("party") ?? q.get("partySize");
+    setFields((f) => {
+      const next = { ...f };
+      if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) next.date = date;
+      if (time) {
+        const slot = TIME_SLOTS.find((s) => s.value === time || s.label === time);
+        if (slot) next.time = slot.value;
+      }
+      if (party) {
+        const n = parseInt(party, 10);
+        if (Number.isFinite(n) && n >= 1) next.partySize = n >= 10 ? "10+" : String(n);
+      }
+      return next;
+    });
   }, []);
 
   const set =
