@@ -102,8 +102,6 @@ export default function SiteNav() {
 
           {/* Right cluster */}
           <div className="flex items-center gap-2">
-            <ThemeToggle docked />
-
             {/* Phone, tap to call. Hidden on mobile (lives in the sheet). */}
             <a
               href={SITE.phoneHref}
@@ -121,6 +119,9 @@ export default function SiteNav() {
               <span className="hidden sm:inline">Reserve a table</span>
               <span className="sm:hidden">Reserve</span>
             </Link>
+
+            {/* Night/day, sits to the right of the Reserve action. */}
+            <ThemeToggle docked />
 
             {/* Hamburger (mobile only). */}
             <button

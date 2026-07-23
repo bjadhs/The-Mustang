@@ -8,7 +8,7 @@ import Concierge from "../src/components/Concierge";
 import { SITE, GEO, POSTER_SOURCES } from "../src/config/site";
 
 // Display face. The current app uses Bricolage Grotesque as --font-display
-// (see src/styles.css @theme). Cabinet Grotesk is not on Google Fonts and no
+// (see app/globals.css @theme). Cabinet Grotesk is not on Google Fonts and no
 // local font files ship in this repo, so we keep exact parity with Bricolage.
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
