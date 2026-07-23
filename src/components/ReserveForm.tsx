@@ -62,7 +62,7 @@ const LABEL = "mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] te
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-export default function ReserveForm() {
+export default function ReserveForm({ masthead }: { masthead?: React.ReactNode }) {
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [table, setTable] = useState<TableSelection | null>(null);
   const [status, setStatus] = useState<Status>("idle");
@@ -200,13 +200,15 @@ export default function ReserveForm() {
 
   return (
     <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-10">
-      {/* Left: the room. Hidden on mobile once the form step is active; always
-          shown on large screens. */}
+      {/* Left column: masthead + floor plan as one unit. Hidden on mobile once
+          the form step is active; always shown on large screens, where the
+          floor plan flexes to fill the space the form's height leaves. */}
       <div
-        className={`flex-col gap-3 lg:flex lg:h-full ${
+        className={`flex-col gap-4 lg:flex lg:h-full ${
           mobileView === "form" ? "hidden lg:flex" : "flex"
         }`}
       >
+        {masthead ? <div className="shrink-0">{masthead}</div> : null}
         <div className="lg:min-h-0 lg:flex-1">
           <FloorPlan selectedId={table?.id ?? null} onSelect={handleSelect} />
         </div>

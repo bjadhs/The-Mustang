@@ -16,34 +16,36 @@ export const metadata: Metadata = {
 export default function ReservePage() {
   return (
     <main className="min-h-dvh bg-canvas text-fg">
-      <div className="mx-auto max-w-7xl px-5 pb-24 pt-28 md:px-8 md:pb-32 md:pt-36">
-        {/* Masthead: short title + the three quick facts, sitting tight above
-            the floor plan. */}
-        <header className="mb-6 md:mb-8">
-          <p className="mb-3 flex items-baseline gap-3 font-mono text-[11px] uppercase tracking-[0.24em]">
-            <span className="text-fg-faint">01</span>
-            <span className="text-chili">Book your seat</span>
-          </p>
-          <h1 className="font-display text-3xl font-extrabold leading-[1.0] tracking-tighter md:text-4xl">
-            Reserve a table
-          </h1>
+      <div className="mx-auto max-w-7xl px-5 pb-24 pt-10 md:px-8 md:pb-32 md:pt-14">
+        {/* The masthead (short title + three quick facts) is server-rendered
+            here for SEO but handed to ReserveForm so it sits at the top of the
+            left column, directly above the floor plan, as one unit. */}
+        <ReserveForm
+          masthead={
+            <header>
+              <p className="mb-3 flex items-baseline gap-3 font-mono text-[11px] uppercase tracking-[0.24em]">
+                <span className="text-fg-faint">01</span>
+                <span className="text-chili">Book your seat</span>
+              </p>
+              <h1 className="font-display text-3xl font-extrabold leading-[1.0] tracking-tighter md:text-4xl">
+                Reserve a table
+              </h1>
 
-          {/* Quick facts: open, location, phone. */}
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.14em] text-fg-dim">
-            <span className="flex items-center gap-2">
-              <Clock className="h-3.5 w-3.5 text-chili" /> {SITE.hoursShort}
-            </span>
-            <a href={SITE.mapUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 transition-colors hover:text-fg">
-              <MapPin className="h-3.5 w-3.5 text-chili" /> {SITE.address}
-            </a>
-            <a href={SITE.phoneHref} className="flex items-center gap-2 transition-colors hover:text-fg">
-              <Phone className="h-3.5 w-3.5 text-chili" /> {SITE.phone}
-            </a>
-          </div>
-        </header>
-
-        {/* The interactive pair: floor plan + form. */}
-        <ReserveForm />
+              {/* Quick facts: open, location, phone. */}
+              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.14em] text-fg-dim">
+                <span className="flex items-center gap-2">
+                  <Clock className="h-3.5 w-3.5 text-chili" /> {SITE.hoursShort}
+                </span>
+                <a href={SITE.mapUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 transition-colors hover:text-fg">
+                  <MapPin className="h-3.5 w-3.5 text-chili" /> {SITE.address}
+                </a>
+                <a href={SITE.phoneHref} className="flex items-center gap-2 transition-colors hover:text-fg">
+                  <Phone className="h-3.5 w-3.5 text-chili" /> {SITE.phone}
+                </a>
+              </div>
+            </header>
+          }
+        />
       </div>
     </main>
   );

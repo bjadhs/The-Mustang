@@ -79,7 +79,7 @@ export default function MenuPage() {
 
       {/* Masthead. Server rendered so all menu copy is in the initial HTML. */}
       <header className="paper-texture border-b border-line bg-canvas">
-        <div className="mx-auto max-w-6xl px-5 pb-12 pt-16 md:px-8 md:pb-16 md:pt-24">
+        <div className="mx-auto max-w-6xl px-5 pb-12 pt-10 md:px-8 md:pb-16 md:pt-14">
           <p className="mb-4 flex items-baseline gap-3 font-mono text-[11px] uppercase tracking-[0.24em]">
             <span className="text-fg-faint">Farrer ACT 2607</span>
             <span className="text-chili">The full menu</span>

@@ -42,7 +42,7 @@ export default function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSONLD) }}
       />
       {/* Story */}
-      <section className="paper-texture border-b border-line py-28 md:py-36">
+      <section className="paper-texture border-b border-line pb-28 pt-10 md:pb-36 md:pt-14">
         <div className="mx-auto max-w-5xl px-5 md:px-8">
           <p className="mb-6 flex items-baseline gap-3 font-mono text-[11px] uppercase tracking-[0.24em]">
             <span className="text-fg-faint">01</span>
