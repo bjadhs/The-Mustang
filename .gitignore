@@ -9,6 +9,7 @@ out/
 !.env.example
 public/assets/*.mp4
 public/assets/mustang-hero.mp4
+!public/assets/mustang.mp4
 
 *.md
 !README.md
