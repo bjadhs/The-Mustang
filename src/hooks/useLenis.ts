@@ -17,7 +17,16 @@ export function useLenis() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
 
-    const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    // lerp bumped 0.1 -> 0.12 so the scroll catches up a touch faster (less
+    // "wading"), while wheel/touch multipliers cover a little more distance per
+    // gesture. Net effect: the film scrubs in noticeably quicker but still
+    // smooth. Keep these gentle; large values make the scrub feel twitchy.
+    const lenis = new Lenis({
+      lerp: 0.12,
+      smoothWheel: true,
+      wheelMultiplier: 1.18,
+      touchMultiplier: 1.5,
+    });
     lenisRef.current = lenis;
     /* Exposed so overlays (the reservation dialog) can pause/resume the smooth
        scroll while they hold the viewport. */

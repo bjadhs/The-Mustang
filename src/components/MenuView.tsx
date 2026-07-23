@@ -282,14 +282,22 @@ function MenuViewInner() {
   const chipRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   useEffect(() => {
     if (!activeId) return;
+    const rail = railRef.current;
     const chip = chipRefs.current.get(activeId);
-    if (chip) {
-      chip.scrollIntoView({
-        inline: "center",
-        block: "nearest",
-        behavior: prefersReducedMotion() ? "auto" : "smooth",
-      });
-    }
+    if (!rail || !chip) return;
+    // Center the active chip by scrolling the rail HORIZONTALLY only. The old
+    // chip.scrollIntoView({ block: "nearest" }) also scrolled the *window*
+    // vertically to reveal the chip on first mount, which tucked the page
+    // heading up under the sticky nav. Nudging rail.scrollLeft never touches the
+    // page's vertical scroll, so the masthead stays put at load.
+    const railRect = rail.getBoundingClientRect();
+    const chipRect = chip.getBoundingClientRect();
+    const delta =
+      chipRect.left + chipRect.width / 2 - (railRect.left + railRect.width / 2);
+    rail.scrollTo({
+      left: rail.scrollLeft + delta,
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    });
   }, [activeId]);
 
   const jumpTo = useCallback((id: MenuCategoryId) => {

@@ -332,5 +332,8 @@ export const CHAPTERS: Chapter[] = [
   },
 ];
 
-/** Total scroll length of the experience, in viewport heights. */
-export const EXPERIENCE_VH = 520;
+/** Total scroll length of the experience, in viewport heights. Trimmed
+ *  520 -> 470 so the film reaches each chapter with a little less scrolling;
+ *  paired with the Lenis speed bump this makes the journey feel quicker
+ *  without losing the room each chapter needs to build. */
+export const EXPERIENCE_VH = 470;

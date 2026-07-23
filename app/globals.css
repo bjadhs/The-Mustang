@@ -77,7 +77,12 @@ html.lenis body {
 body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* clip, not hidden: `overflow-x: hidden` makes <body> a scroll container,
+     which breaks `position: sticky` on the header (a direct child of body) so
+     the nav scrolls away instead of pinning. `clip` still trims the decorative
+     horizontal bleed (FilmScrim -inset-x) without creating a scroll container,
+     so the sticky header stays fixed. html already uses overflow-x: clip. */
+  overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
   /* Fallback cross-fade for browsers without view transitions. */
   transition: background-color 500ms ease, color 500ms ease;
