@@ -194,20 +194,23 @@ export default function FloorPlan({ selectedId, onSelect, unavailableIds }: Floo
   const titleId = useId();
 
   return (
-    <div className="border border-line border-t-2 border-t-chili bg-canvas-2 p-4 md:p-5">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="flex h-full flex-col border border-line border-t-2 border-t-chili bg-canvas-2 p-4 md:p-5">
+      <div className="mb-3 flex shrink-0 items-center justify-between">
         <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-chili">Floor plan</p>
         <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-fg-faint">
           Street side, top
         </p>
       </div>
 
+      {/* On large screens the panel fills its grid column (matched to the form
+          height) and the square plan scales down to fit; on mobile it sizes to
+          its own aspect ratio, capped so it never dominates the viewport. */}
+      <div className="flex min-h-0 flex-1 items-center justify-center">
       <svg
         viewBox={`-4 -4 ${FLOOR_GRID.w + 8} ${FLOOR_GRID.h + 8}`}
-        className="fp-svg w-full"
+        className="fp-svg w-full max-h-[56vh] lg:h-full lg:max-h-none"
         role="group"
         aria-labelledby={titleId}
-        style={{ maxHeight: "70vh" }}
       >
         <title id={titleId}>Restaurant floor plan. Select a table to set a seating preference.</title>
 
@@ -324,9 +327,10 @@ export default function FloorPlan({ selectedId, onSelect, unavailableIds }: Floo
           );
         })}
       </svg>
+      </div>
 
       {/* Legend. */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.12em] text-fg-faint">
+      <div className="mt-4 flex shrink-0 flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.12em] text-fg-faint">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 border border-fg-faint" /> Available
         </span>

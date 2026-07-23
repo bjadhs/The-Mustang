@@ -17,23 +17,19 @@ export default function ReservePage() {
   return (
     <main className="min-h-dvh bg-canvas text-fg">
       <div className="mx-auto max-w-7xl px-5 pb-24 pt-28 md:px-8 md:pb-32 md:pt-36">
-        {/* Masthead. */}
-        <header className="max-w-3xl">
-          <p className="mb-4 flex items-baseline gap-3 font-mono text-[11px] uppercase tracking-[0.24em]">
+        {/* Masthead: short title + the three quick facts, sitting tight above
+            the floor plan. */}
+        <header className="mb-6 md:mb-8">
+          <p className="mb-3 flex items-baseline gap-3 font-mono text-[11px] uppercase tracking-[0.24em]">
             <span className="text-fg-faint">01</span>
             <span className="text-chili">Book your seat</span>
           </p>
-          <h1 className="font-display text-4xl font-extrabold leading-[0.98] tracking-tighter md:text-6xl">
-            Reserve a table at The Mustang
+          <h1 className="font-display text-3xl font-extrabold leading-[1.0] tracking-tighter md:text-4xl">
+            Reserve a table
           </h1>
-          <p className="mt-6 max-w-[54ch] text-lg leading-relaxed text-fg-dim">
-            Choose a spot on the floor plan, tell us when and how many, and we will confirm your
-            booking by phone. A chosen table is a seating preference, not a guaranteed hold, so we
-            can seat you as well as the night allows.
-          </p>
 
-          {/* Quick facts. */}
-          <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[11px] uppercase tracking-[0.14em] text-fg-dim">
+          {/* Quick facts: open, location, phone. */}
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.14em] text-fg-dim">
             <span className="flex items-center gap-2">
               <Clock className="h-3.5 w-3.5 text-chili" /> {SITE.hoursShort}
             </span>
@@ -45,8 +41,6 @@ export default function ReservePage() {
             </a>
           </div>
         </header>
-
-        <div className="docket-rule my-12" />
 
         {/* The interactive pair: floor plan + form. */}
         <ReserveForm />

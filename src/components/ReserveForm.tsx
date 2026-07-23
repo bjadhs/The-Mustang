@@ -69,6 +69,17 @@ export default function ReserveForm() {
   const [error, setError] = useState<string>("");
   const successName = useRef<string>("");
 
+  // On small screens the floor plan and the form are two steps: the plan shows
+  // first, then collapses to reveal the form the moment a table is picked (or
+  // the guest chooses to skip). On large screens both panels are always visible
+  // side by side, so this flag is ignored above the `lg` breakpoint.
+  const [mobileView, setMobileView] = useState<"plan" | "form">("plan");
+
+  const handleSelect = (t: TableSelection) => {
+    setTable((cur) => (cur?.id === t.id ? null : t));
+    setMobileView("form");
+  };
+
   // Booking window: today through ~30 days out. Derived from a hydration-safe
   // clock (0 until mounted) so the date-input min/max are omitted on the server
   // and first client render, then filled in after hydration. Computing them
@@ -188,26 +199,53 @@ export default function ReserveForm() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-10">
-      {/* Left: the room. */}
-      <div>
-        <FloorPlan
-          selectedId={table?.id ?? null}
-          onSelect={(t) => setTable((cur) => (cur?.id === t.id ? null : t))}
-        />
-        <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-fg-faint">
+    <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-10">
+      {/* Left: the room. Hidden on mobile once the form step is active; always
+          shown on large screens. */}
+      <div
+        className={`flex-col gap-3 lg:flex lg:h-full ${
+          mobileView === "form" ? "hidden lg:flex" : "flex"
+        }`}
+      >
+        <div className="lg:min-h-0 lg:flex-1">
+          <FloorPlan selectedId={table?.id ?? null} onSelect={handleSelect} />
+        </div>
+        <p className="flex shrink-0 items-start gap-2 text-xs leading-relaxed text-fg-faint">
           <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-chili" aria-hidden="true" />
           Pick a table to note a seating preference. It is not a guaranteed hold; the team will do
           their best to seat you there.
         </p>
+        {/* Mobile only: proceed to the form without picking a table. */}
+        <button
+          type="button"
+          onClick={() => setMobileView("form")}
+          className="flex shrink-0 items-center justify-center gap-2 border border-line px-5 py-3 font-mono text-xs uppercase tracking-[0.16em] text-fg-dim transition-colors hover:border-chili hover:text-fg lg:hidden"
+        >
+          Continue without a table
+          <ArrowUpRight className="h-4 w-4" />
+        </button>
       </div>
 
-      {/* Right: the booking form. */}
+      {/* Right: the booking form. Hidden on mobile until the plan step hands
+          off; always shown on large screens. */}
       <form
         onSubmit={onSubmit}
-        className="border border-line border-t-2 border-t-chili bg-canvas-2 p-6 md:p-7"
+        className={`border border-line border-t-2 border-t-chili bg-canvas-2 p-6 md:p-7 ${
+          mobileView === "plan" ? "hidden lg:block" : "block"
+        }`}
         aria-label="Reserve a table"
       >
+        {/* Mobile only: step back to the floor plan to pick or change a table. */}
+        <button
+          type="button"
+          onClick={() => setMobileView("plan")}
+          className="mb-5 flex w-full items-center justify-between gap-3 border border-line px-3.5 py-2.5 text-left font-mono text-[11px] uppercase tracking-[0.14em] text-fg-dim transition-colors hover:border-chili lg:hidden"
+        >
+          <span className="truncate">
+            {table ? `${table.label} · ${table.zone}` : "No table selected"}
+          </span>
+          <span className="shrink-0 text-chili">Change</span>
+        </button>
         <p className="mb-1 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-chili">
           <CalendarCheck className="h-3.5 w-3.5" /> Book a table
         </p>
